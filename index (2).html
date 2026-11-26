@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact QR Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #3fb950;
+    --accent-hover: #56d364;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    width: 100%;
+    max-width: 420px;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+  p.sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 20px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 12px 0 4px;
+  }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 11px;
+    background: var(--accent);
+    color: #0d1117;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: var(--accent-hover); }
+  #qr-wrap {
+    margin-top: 22px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  #qr-code {
+    background: #fff;
+    padding: 12px;
+    border-radius: 8px;
+  }
+  .download-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 500;
+  }
+  .download-btn:hover { background: #21262d; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Contact QR Generator</h1>
+    <p class="sub">Turn your contact info into a scannable QR code.</p>
+
+    <label>Full Name</label>
+    <input id="name" placeholder="Omkar Raut">
+
+    <label>Phone</label>
+    <input id="phone" placeholder="+91 98765 43210">
+
+    <label>Email</label>
+    <input id="email" placeholder="you@example.com">
+
+    <label>Organization (optional)</label>
+    <input id="org" placeholder="Company / College">
+
+    <button onclick="generateQR()">Generate QR Code</button>
+
+    <div id="qr-wrap">
+      <div id="qr-code"></div>
+      <button class="download-btn" onclick="downloadQR()">Download PNG</button>
+    </div>
+  </div>
+
+<script>
+let qrInstance = null;
+
+function generateQR() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const org = document.getElementById('org').value.trim();
+
+  if (!name && !phone && !email) {
+    alert('Enter at least a name, phone, or email.');
+    return;
+  }
+
+  // Build vCard format so scanning saves it as a contact
+  const vcard = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    name ? `FN:${name}` : '',
+    org ? `ORG:${org}` : '',
+    phone ? `TEL:${phone}` : '',
+    email ? `EMAIL:${email}` : '',
+    'END:VCARD'
+  ].filter(Boolean).join('\n');
+
+  const qrContainer = document.getElementById('qr-code');
+  qrContainer.innerHTML = '';
+  qrInstance = new QRCode(qrContainer, {
+    text: vcard,
+    width: 200,
+    height: 200,
+    colorDark: '#0d1117',
+    colorLight: '#ffffff'
+  });
+
+  document.getElementById('qr-wrap').style.display = 'flex';
+}
+
+function downloadQR() {
+  const img = document.querySelector('#qr-code img') || document.querySelector('#qr-code canvas');
+  if (!img) return;
+  const link = document.createElement('a');
+  link.download = 'contact-qr.png';
+  link.href = img.src || img.toDataURL();
+  link.click();
+}
+</script>
+</body>
+</html>
